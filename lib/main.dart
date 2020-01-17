@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:intl/intl.dart';
 import 'package:flutter/material.dart';
 import 'package:light/light.dart';
 import 'package:sensors/sensors.dart';
@@ -29,10 +30,30 @@ class MyHomePage extends StatefulWidget {
 
 class _MyHomePageState extends State<MyHomePage> {
   int _counter = 0;
-  AccelerometerEvent _accele;
+  double _accele_x;
+  double _accele_y;
+  double _accele_z;
 
   Light _light;
   StreamSubscription _subscription;
+
+  String _time = '';
+
+  @override
+  void initState() {
+    Timer.periodic(
+      Duration(seconds: 1),
+      _onTimer,
+    );
+    super.initState();
+  }
+
+  void _onTimer(Timer timer) {
+    var now = DateTime.now();
+    var formatter = DateFormat('HH:mm:ss');
+    var formattedTime = formatter.format(now);
+    setState(() => _time = formattedTime);
+  }
 
   void onData(int luxValue) async {
     setState(() {
@@ -45,7 +66,7 @@ class _MyHomePageState extends State<MyHomePage> {
   void catchE() {
     accelerometerEvents.listen((AccelerometerEvent event) {
       setState(() {
-        _accele = event;
+        _accele_x = event.x;
       });      
     });  
   }
@@ -60,6 +81,34 @@ class _MyHomePageState extends State<MyHomePage> {
       }
   }
 
+  int change_bligtness(light){
+    if (light < 50){
+      return 50;
+    }else if(light >= 50 && light < 150){
+      return 100;
+    }else if(light >= 150 && light < 250){
+      return 200;
+    }else if(light >= 250 && light < 350){
+      return 300;
+    }else if(light >= 450 && light < 550){
+      return 400;
+    }else if(light >= 650 && light < 750){
+      return 500;
+    }else if(light >= 750 && light < 850){
+      return 600;
+    }else if(light >= 850 && light < 950){
+      return 700;
+    }else if(light >= 50 && light < 150){
+      return 800;
+    }else{
+      return 900;
+    }
+  }
+
+  int counter_beat(){
+
+  }
+
   @override
   Widget build(BuildContext context) {
     startListening();
@@ -72,6 +121,12 @@ class _MyHomePageState extends State<MyHomePage> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
+            Container(
+              alignment: Alignment.center,
+              width: 300,
+              height: 300,
+              color: Colors.lightBlue[change_bligtness(_counter)],
+            ),
             Text(
               'Lux value from Light Sensor:',
             ),
@@ -80,7 +135,7 @@ class _MyHomePageState extends State<MyHomePage> {
               style: Theme.of(context).textTheme.display1,
             ),
             Text(
-              '$_accele',
+              '$_onTimer',
               // style: Theme.of(context).textTheme.display1,
             ),            
           ],
