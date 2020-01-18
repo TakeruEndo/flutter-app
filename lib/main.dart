@@ -4,6 +4,7 @@ import 'package:intl/intl.dart';
 import 'package:flutter/material.dart';
 import 'package:light/light.dart';
 import 'package:sensors/sensors.dart';
+import 'weather.dart';
 
 void main() => runApp(MyApp());
 
@@ -15,24 +16,33 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
-      home: MyHomePage(title: 'Flutter Demo Home Page'),
+      routes: {
+        '/weather': (context) => WeatherScreen(),
+      },      
+      home: HomeScreen(title: 'Flutter Demo Home Page'),
     );
   }
 }
 
-class MyHomePage extends StatefulWidget {
-  MyHomePage({Key key, this.title}) : super(key: key);
+class HomeScreen extends StatefulWidget {
+  HomeScreen({Key key, this.title}) : super(key: key);
 
   final String title;
   @override
   _MyHomePageState createState() => _MyHomePageState();
 }
 
-class _MyHomePageState extends State<MyHomePage> {
-  int _counter = 0;
+class _MyHomePageState extends State<HomeScreen> {
+  // 光の強さ
+  int _luxValue = 0;
+  // x方向の加速度
   double _accele_x;
+  // y方向の加速度
   double _accele_y;
+  // z方向の加速度
   double _accele_z;
+  // 現在日時
+  final now = DateTime.now();
 
   Light _light;
   StreamSubscription _subscription;
@@ -58,7 +68,7 @@ class _MyHomePageState extends State<MyHomePage> {
   void onData(int luxValue) async {
     setState(() {
 
-      _counter = luxValue;
+      _luxValue = luxValue;
     });
       // print("Lux value from Light Sensor: $luxValue");
   }
@@ -105,10 +115,6 @@ class _MyHomePageState extends State<MyHomePage> {
     }
   }
 
-  int counter_beat(){
-
-  }
-
   @override
   Widget build(BuildContext context) {
     startListening();
@@ -125,24 +131,26 @@ class _MyHomePageState extends State<MyHomePage> {
               alignment: Alignment.center,
               width: 300,
               height: 300,
-              color: Colors.lightBlue[change_bligtness(_counter)],
+              color: Colors.lightBlue[change_bligtness(_luxValue)],
             ),
             Text(
               'Lux value from Light Sensor:',
             ),
             Text(
-              '$_counter',
+              '$_luxValue',
               style: Theme.of(context).textTheme.display1,
             ),
-            Text(
-              '$_onTimer',
-              // style: Theme.of(context).textTheme.display1,
-            ),            
+            // Text(
+            //   '$_onTimer',
+            //   // style: Theme.of(context).textTheme.display1,
+            // ),
           ],
         ),
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: (){},
+        onPressed: (){
+            Navigator.pushNamed(context, '/weather');
+        },
         tooltip: 'Increment',
         child: Icon(Icons.add),
       ),

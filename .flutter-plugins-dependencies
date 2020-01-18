@@ -1,1 +1,1 @@
-{"_info":"// This is a generated file; do not edit or check into version control.","dependencyGraph":[{"name":"light","dependencies":[]},{"name":"sensors","dependencies":[]}]}
+{"_info":"// This is a generated file; do not edit or check into version control.","dependencyGraph":[{"name":"light","dependencies":[]},{"name":"location","dependencies":[]},{"name":"sensors","dependencies":[]}]}
