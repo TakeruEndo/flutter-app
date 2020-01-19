@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:math';
 
 import 'package:alive/my_flutter_app_icons.dart';
 import 'package:intl/intl.dart';
@@ -15,7 +16,8 @@ class WeatherScreen extends StatefulWidget {
   _WeatherScreenState createState() => _WeatherScreenState();
 }
 
-class _WeatherScreenState extends State<WeatherScreen> {
+class _WeatherScreenState extends State<WeatherScreen>
+    with SingleTickerProviderStateMixin {
   Weather celsius;
 
   // 使いすぎると？
@@ -27,6 +29,37 @@ class _WeatherScreenState extends State<WeatherScreen> {
   WeatherStation weatherStation = WeatherStation(Config.weatherStationApi);
 
   var weatherMap = {};
+
+  AnimationController _controller;
+  Animation<double> _frontScale;
+  Animation<double> _backScale;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = new AnimationController(
+      vsync: this,
+      duration: const Duration(seconds: 1),
+    );
+    _frontScale = new Tween(
+      begin: 1.0,
+      end: 0.0,
+    ).animate(new CurvedAnimation(
+      parent: _controller,
+      curve: new Interval(0.0, 0.5, curve: Curves.easeIn),
+    ));
+    _backScale = new CurvedAnimation(
+      parent: _controller,
+      curve: new Interval(0.5, 1.0, curve: Curves.easeOut),
+    );
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
 
   /// 天気の情報を取得する関数
   Future<Map> getWeather() async{
@@ -182,6 +215,50 @@ class _WeatherScreenState extends State<WeatherScreen> {
     }
   }
 
+  Widget frontCard() {
+    return Column(
+    children: <Widget>[
+      getIcon(weatherMap["main"]),
+      Container(
+        margin:
+        EdgeInsets.only(top: 10),
+      ),
+      itemBase("weather", weatherMap["main"].toString()),
+      itemBase("location", weatherMap["areaName"].toString()),
+      itemBase("date", weatherMap["date"].toString()),
+      itemBase("temparture", weatherMap["temparture"].toString()),
+      itemBase("temparture(min)", weatherMap["tempMax"].toString()),
+      itemBase("temparture(max)", weatherMap["tempMin"].toString()),
+      itemBase("sunrise", weatherMap["sunrise"].toString()),
+      itemBase("sunset", weatherMap["sunset"].toString()),
+      itemBase("humidity", weatherMap["humidity"].toString()),
+      itemBase("wind-speed", weatherMap["windSpeed"].toString())
+    ],
+  );
+  }
+
+  Widget backCard() {
+    return Column(
+      children: <Widget>[
+        Container(
+        margin:
+          EdgeInsets.only(top: 20, left: 10, right: 10, bottom: 20),                          
+          child: Text(
+            "冬にしてはあったかい。コートは薄めでいいかも！？！？",
+            style: TextStyle(
+              color: Colors.white,
+            ),
+          ),
+        ),
+        Container(
+          margin: EdgeInsets.only(top: 20, left: 10, right: 10),
+          height: 50,
+          color: Colors.lightBlue,
+        )
+      ],
+    );
+  }
+
 
   @override
   Widget build(BuildContext context) {
@@ -196,6 +273,7 @@ class _WeatherScreenState extends State<WeatherScreen> {
         builder: (BuildContext context, AsyncSnapshot snapshot) {
           if (snapshot.hasData) {
             return Stack(
+
               children: <Widget>[
                 Container(
                   child: Container(
@@ -215,40 +293,47 @@ class _WeatherScreenState extends State<WeatherScreen> {
                   // height: 300,
                   color: Colors.black38,
                   alignment: Alignment.center,
-                    child: Column(
+
+                  child: GestureDetector(
+                    onTap: () {
+                      setState(() {
+                        if (_controller.isCompleted || _controller.velocity > 0)
+                          _controller.reverse();
+                        else
+                          _controller.forward();
+                      });
+                    },
+                    child : Stack(
                       children: <Widget>[
-                        getIcon(weatherMap["main"]),
-                        Container(
-                          margin:
-                          EdgeInsets.only(top: 10),
+                        new AnimatedBuilder(
+                          child: frontCard(),
+                          animation: _backScale,
+                          builder: (BuildContext context, Widget child) {
+                            final Matrix4 transform = new Matrix4.identity()
+                              ..scale(1.0, _backScale.value, 1.0);
+                            return new Transform(
+                              transform: transform,
+                              alignment: FractionalOffset.center,
+                              child: child,
+                            );
+                          },
                         ),
-                        itemBase("weather", weatherMap["main"].toString()),
-                        itemBase("location", weatherMap["areaName"].toString()),
-                        itemBase("date", weatherMap["date"].toString()),
-                        itemBase("temparture", weatherMap["temparture"].toString()),
-                        itemBase("temparture(min)", weatherMap["tempMax"].toString()),
-                        itemBase("temparture(max)", weatherMap["tempMin"].toString()),
-                        itemBase("sunrise", weatherMap["sunrise"].toString()),
-                        itemBase("sunset", weatherMap["sunset"].toString()),
-                        itemBase("humidity", weatherMap["humidity"].toString()),
-                        itemBase("wind-speed", weatherMap["windSpeed"].toString()),
-                        Container(
-                        margin:
-                          EdgeInsets.only(top: 20, left: 10, right: 10, bottom: 20),                          
-                          child: Text(
-                            "冬にしてはあったかい。コートは薄めでいいかも！？！？",
-                            style: TextStyle(
-                              color: Colors.white,
-                            ),
-                          ),
+                        new AnimatedBuilder(
+                          child: backCard(),
+                          animation: _frontScale,
+                          builder: (BuildContext context, Widget child) {
+                            final Matrix4 transform = new Matrix4.identity()
+                              ..scale(1.0, _frontScale.value, 1.0);
+                            return new Transform(
+                              transform: transform,
+                              alignment: FractionalOffset.center,
+                              child: child,
+                            );
+                          },
                         ),
-                        Container(
-                          margin: EdgeInsets.only(top: 20, left: 10, right: 10),
-                          height: 50,
-                          color: Colors.lightBlue,
-                        )
                       ],
                     )
+                  )
                 ),
               ],
             );
