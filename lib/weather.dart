@@ -1,8 +1,6 @@
 import 'dart:async';
-import 'dart:math';
 
 import 'package:alive/my_flutter_app_icons.dart';
-import 'package:intl/intl.dart';
 import 'package:flutter/material.dart';
 
 import 'package:weather/weather.dart';
@@ -20,12 +18,6 @@ class _WeatherScreenState extends State<WeatherScreen>
     with SingleTickerProviderStateMixin {
   Weather celsius;
 
-  // 使いすぎると？
-  // OpenWeatherAPIException - OpenWeather API Exception: 
-  // {"cod":429, "message": "Your account is temporary blocked due to exceeding of 
-  // requests limitation of your subscription type. Please choose the proper subscription 
-  // http://openweathermap.org/price"}
-  // 
   WeatherStation weatherStation = WeatherStation(Config.weatherStationApi);
 
   var weatherMap = {};

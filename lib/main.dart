@@ -1,10 +1,7 @@
-import 'dart:async';
-
-import 'package:intl/intl.dart';
 import 'package:flutter/material.dart';
-import 'package:light/light.dart';
-import 'package:sensors/sensors.dart';
 import 'weather.dart';
+import 'light_art.dart';
+import 'menu_bar.dart';
 
 void main() => runApp(MyApp());
 
@@ -12,14 +9,12 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Flutter Demo',
-      theme: ThemeData(
-        primarySwatch: Colors.blue,
-      ),
       routes: {
         '/weather': (context) => WeatherScreen(),
+        '/light': (context) => LightArtScreen(),
+        '/menu_bar': (context) => MenuBar(),
       },      
-      home: HomeScreen(title: 'Flutter Demo Home Page'),
+      home: HomeScreen(title: 'Flutter PortFolio'),
     );
   }
 }
@@ -33,127 +28,135 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<HomeScreen> {
-  // 光の強さ
-  int _luxValue = 0;
-  // x方向の加速度
-  double _accele_x;
-  // y方向の加速度
-  double _accele_y;
-  // z方向の加速度
-  double _accele_z;
-  // 現在日時
-  final now = DateTime.now();
-
-  Light _light;
-  StreamSubscription _subscription;
-
-  String _time = '';
-
-  @override
-  void initState() {
-    Timer.periodic(
-      Duration(seconds: 1),
-      _onTimer,
-    );
-    super.initState();
-  }
-
-  void _onTimer(Timer timer) {
-    var now = DateTime.now();
-    var formatter = DateFormat('HH:mm:ss');
-    var formattedTime = formatter.format(now);
-    setState(() => _time = formattedTime);
-  }
-
-  void onData(int luxValue) async {
-    setState(() {
-
-      _luxValue = luxValue;
-    });
-      // print("Lux value from Light Sensor: $luxValue");
-  }
-
-  void catchE() {
-    accelerometerEvents.listen((AccelerometerEvent event) {
-      setState(() {
-        _accele_x = event.x;
-      });      
-    });  
-  }
-
-  void startListening() {
-      _light = new Light();
-      try {
-        _subscription = _light.lightSensorStream.listen(onData);
-      }
-      on LightException catch (exception) {
-        print(exception);
-      }
-  }
-
-  int change_bligtness(light){
-    if (light < 50){
-      return 50;
-    }else if(light >= 50 && light < 150){
-      return 100;
-    }else if(light >= 150 && light < 250){
-      return 200;
-    }else if(light >= 250 && light < 350){
-      return 300;
-    }else if(light >= 450 && light < 550){
-      return 400;
-    }else if(light >= 650 && light < 750){
-      return 500;
-    }else if(light >= 750 && light < 850){
-      return 600;
-    }else if(light >= 850 && light < 950){
-      return 700;
-    }else if(light >= 50 && light < 150){
-      return 800;
-    }else{
-      return 900;
-    }
-  }
 
   @override
   Widget build(BuildContext context) {
-    startListening();
-    catchE();
     return Scaffold(
       appBar: AppBar(
         title: Text(widget.title),
+        centerTitle: true,
+        backgroundColor: Colors.black,
+        actions: <Widget>[
+          IconButton(
+            icon: Icon(Icons.dehaze),
+            color: Colors.white,
+            onPressed: () => Navigator.pushNamed(context, '/menu_bar')
+          )
+        ],
       ),
-      body: Center(
+      body: Container(
         child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
-            Container(
-              alignment: Alignment.center,
-              width: 300,
-              height: 300,
-              color: Colors.lightBlue[change_bligtness(_luxValue)],
+            WorkBox(
+              '/weather',
+              '天気',
+              Icons.wb_cloudy,
+              Colors.blue,
+              "現在の天気を表示するアプリケーション。ただし天気の予報機能は未実装。",
             ),
-            Text(
-              'Lux value from Light Sensor:',
-            ),
-            Text(
-              '$_luxValue',
-              style: Theme.of(context).textTheme.display1,
-            ),
-            // Text(
-            //   '$_onTimer',
-            //   // style: Theme.of(context).textTheme.display1,
-            // ),
+            WorkBox(
+              '/light',
+              '光のアート',
+              Icons.lightbulb_outline,
+              Colors.yellow,
+              "光の強さによって動作を変えるアプリケーション。",
+            )            
           ],
         ),
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: (){
-            Navigator.pushNamed(context, '/weather');
-        },
-        tooltip: 'Increment',
-        child: Icon(Icons.add),
-      ),
     );
   }
+}
+
+class WorkBox extends StatefulWidget{
+  /// Constructor for [WorkBox]
+  WorkBox(
+      this.root,
+      this.title,
+      this.icon,
+      this.iconColor,
+      this.description)
+      : assert(root != null);  
+
+  final String root;
+
+  final String title;
+
+  final IconData icon;
+
+  final Color iconColor;
+
+  final String description;
+
+  @override
+  State<WorkBox> createState() => _WorkBoxState();
+}
+
+class _WorkBoxState extends State<WorkBox> {
+
+  Widget itemTitle(value, iconName, color) {
+    return Container(
+      margin: EdgeInsets.only(right: 20, left: 20),
+      child: Row(
+        children: <Widget>[
+          Text(
+            value,
+            style: TextStyle(
+              fontSize: 20.0,
+              fontWeight: FontWeight.w700,
+            ),
+          ),
+          Container(
+            margin: EdgeInsets.only(right: 10),
+          ),
+          Icon(
+            iconName,
+            color: color,
+            )
+        ],
+      )
+    );
+  }
+
+  Widget itemDescription(value) {
+    return Container(
+      margin: EdgeInsets.only(right: 20, left: 20),
+      child: Text(
+        value,
+        style: TextStyle(
+          fontSize: 15.0,
+          fontWeight: FontWeight.w600,
+          height: 2.0
+        ),
+      )
+    );
+  }  
+
+  @override
+    Widget build(BuildContext context) {
+      return GestureDetector(
+        onTap: () {
+          Navigator.pushNamed(context, widget.root);
+        },
+        child :Container(
+          margin:
+            EdgeInsets.only(top: 10, left: 10, right: 10, bottom: 10),  
+          height: 170,
+          decoration: BoxDecoration(
+              color: Colors.white,
+              border: Border.all(color: Colors.blueAccent),
+              borderRadius: BorderRadius.all(Radius.circular(20.0),
+              )),
+              child: Column(
+                children: <Widget>[
+                  Container(
+                    margin: EdgeInsets.only(top: 20),
+                  ),
+                  itemTitle(widget.title, widget.icon, widget.iconColor),
+                  itemDescription(widget.description)
+                ]
+          ),
+        ),
+      );
+    }
 }
