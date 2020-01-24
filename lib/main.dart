@@ -2,6 +2,9 @@ import 'package:flutter/material.dart';
 import 'weather.dart';
 import 'light_art.dart';
 import 'menu_bar.dart';
+import 'custom.dart';
+import 'create_new_task.dart';
+
 
 void main() => runApp(MyApp());
 
@@ -13,8 +16,10 @@ class MyApp extends StatelessWidget {
         '/weather': (context) => WeatherScreen(),
         '/light': (context) => LightArtScreen(),
         '/menu_bar': (context) => MenuBar(),
+        '/custom': (context) => CustomScreen(),
+        '/create_task': (context) => CreateTaskScreen(),
       },      
-      home: HomeScreen(title: 'Flutter PortFolio'),
+      home: HomeScreen(title: 'Flutter Art Work'),
     );
   }
 }
@@ -60,6 +65,13 @@ class _MyHomePageState extends State<HomeScreen> {
               Icons.lightbulb_outline,
               Colors.yellow,
               "光の強さによって動作を変えるアプリケーション。",
+            ),
+            WorkBox(
+              '/custom',
+              '革新的チェックリスト',
+              Icons.calendar_today,
+              Colors.red,
+              "ぜったいにタスクを見逃さない。毎日のtodoリスト。",
             )            
           ],
         ),
