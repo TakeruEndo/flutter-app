@@ -1,4 +1,4 @@
-# alive
+# Add some application
 
 A new Flutter project.
 
