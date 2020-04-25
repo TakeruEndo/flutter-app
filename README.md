@@ -1,5 +1,5 @@
 # flutter application
-細々としたflutterのアプリケーションをまとめている
+flutterのアプリケーションをまとめている
 
 ## 天気表示アプリ
 [OpenWeatherAPI](https://openweathermap.org/)より取得した現在地点の天気を表示するアプリケーション　\
